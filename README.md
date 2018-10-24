@@ -8,6 +8,6 @@ sudoku-web
 
 ## Usage
 
-The server respond on port 8090.
+The application respond on port 300.
 
-Ex: `http://localhost:8090/api/generate`
+Ex: `http://localhost:3000/`
