@@ -5,19 +5,39 @@ import './index.css';
 class Square extends React.Component {
     render() {
         if (this.props.value === 0) {
-            //TODO: Editable cell
             return (
-                <button className="square"></button>
+                <span className="square" contentEditable onInput={this.emitChange.bind(this)}></span>
             );
         }
-        else { 
+        else {
             return (
-                <button className="square">
+                <span className="square">
                     {this.props.value}
-                </button>
+                </span>
             );
         }
-        
+    }
+
+    emitChange() {
+        var row = Math.floor(this.props.id / 10);
+        var col = this.props.id - (row * 10);
+        fetch("http://localhost:8090/api/check", {
+            method: 'POST',
+            body: {
+                rows: this.props.rows
+            }
+        }).then(res => res.json())
+            .then(
+                (result) => {
+                    console.log(result);
+                },
+                // Note: it's important to handle errors here
+                // instead of a catch() block so that we don't swallow
+                // exceptions from actual bugs in components.
+                (error) => {
+                    console.log(error);
+                }
+            )
     }
 }
 
@@ -54,7 +74,7 @@ class Board extends React.Component {
     }
 
     renderSquare(key, value) {
-        return <Square key={key} value={value} />;
+        return <Square key={key} id={key} value={value} rows={this.state.rows} />;
     }
 
     render() {
@@ -71,7 +91,7 @@ class Board extends React.Component {
                             <div key={rowIndex} className="board-row">
                                 {
                                     cols.map((cell, colIndex) => (
-                                        this.renderSquare(rowIndex * 10 + colIndex, cell)
+                                        this.renderSquare((rowIndex + 1) * 10 + colIndex + 1, cell)
                                     ))
                                 }
                             </div>
