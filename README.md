@@ -4,10 +4,13 @@ sudoku-web
 
 ## Installation
 
-`$ npm start`
+```
+$ npm install
+$ npm start
+```
 
 ## Usage
 
-The application respond on port 300.
+The application respond on port 3000.
 
 Ex: `http://localhost:3000/`
