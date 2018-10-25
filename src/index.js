@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import axios from 'axios';
 import './index.css';
 
 class Square extends React.Component {
@@ -18,26 +19,27 @@ class Square extends React.Component {
         }
     }
 
-    emitChange() {
+    emitChange(event) {
+        var input = event.target;
         var row = Math.floor(this.props.id / 10);
         var col = this.props.id - (row * 10);
-        fetch("http://localhost:8090/api/check", {
-            method: 'POST',
-            body: {
-                rows: this.props.rows
-            }
-        }).then(res => res.json())
-            .then(
-                (result) => {
-                    console.log(result);
-                },
-                // Note: it's important to handle errors here
-                // instead of a catch() block so that we don't swallow
-                // exceptions from actual bugs in components.
-                (error) => {
-                    console.log(error);
+        axios.post('http://localhost:8090/api/check', {
+            matrix: this.props.rows,
+            "row": row - 1,
+            "col": col - 1,
+            "num": input.textContent
+        })
+            .then(function (response) {
+                if(response) {
+                    input.style.backgroundColor = "green";
+                } else {
+                    input.style.backgroundColor = "red";
                 }
-            )
+            })
+            .catch(function (error) {
+                input.textContent = "";
+                console.log(error);
+            });
     }
 }
 
