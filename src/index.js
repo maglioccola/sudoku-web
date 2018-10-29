@@ -5,41 +5,35 @@ import './index.css';
 
 class Square extends React.Component {
     render() {
-        if (this.props.value === 0) {
+        if (this.props.color === 'red') {
             return (
-                <span className="square" contentEditable onInput={this.emitChange.bind(this)}></span>
+                <span className="square square-error" contentEditable onInput={this.emitChange.bind(this)}></span>
             );
-        }
-        else {
-            return (
-                <span className="square">
-                    {this.props.value}
-                </span>
-            );
+        } else {
+            if (this.props.value === 0) {
+                return (
+                    <span className="square" contentEditable onInput={this.emitChange.bind(this)}></span>
+                );
+            }
+            else {
+                if (this.props.color === 'green') {
+                    return (
+                        <span className="square square-ok" contentEditable onInput={this.emitChange.bind(this)}></span>
+                    );
+                } else {
+                    return (
+                        <span className="square square-default">
+                            {this.props.value}
+                        </span>
+                    );
+                }
+            }
         }
     }
 
     emitChange(event) {
         var input = event.target;
-        var row = Math.floor(this.props.id / 10);
-        var col = this.props.id - (row * 10);
-        axios.post('http://localhost:8090/api/check', {
-            matrix: this.props.rows,
-            "row": row - 1,
-            "col": col - 1,
-            "num": input.textContent
-        })
-            .then(function (response) {
-                if(response) {
-                    input.style.backgroundColor = "green";
-                } else {
-                    input.style.backgroundColor = "red";
-                }
-            })
-            .catch(function (error) {
-                input.textContent = "";
-                console.log(error);
-            });
+        this.props.onChange(this.props.id, input.textContent);
     }
 }
 
@@ -49,7 +43,8 @@ class Board extends React.Component {
         this.state = {
             error: null,
             isLoaded: false,
-            rows: []
+            rows: [],
+            colors: []
         };
     }
 
@@ -75,8 +70,41 @@ class Board extends React.Component {
             )
     }
 
+    handleClick(key, val) {
+        const updatedRows = this.state.rows.slice();
+        const colors = this.state.colors.slice();
+        var row = Math.floor(key / 10);
+        var col = (key - (row * 10));
+        row--; col--;
+        if (val < 1 || val > 9) {
+            colors[key] = "red";
+            this.setState({ rows: updatedRows, colors: colors });
+        } else {
+            axios.post('http://localhost:8090/api/check', {
+                matrix: updatedRows,
+                "row": row,
+                "col": col,
+                "num": val
+            })
+                .then((response) => {
+                    if (response.data) {
+                        updatedRows[row][col] = parseInt(val);
+                        colors[key] = "green";
+                    } else {
+                        updatedRows[row][col] = 0;
+                        colors[key] = "red";
+                    }
+                    this.setState({ rows: updatedRows, colors: colors });
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        }
+    }
+
     renderSquare(key, value) {
-        return <Square key={key} id={key} value={value} rows={this.state.rows} />;
+        let color = this.state.colors[key];
+        return <Square key={key} id={key} value={value} color={color} rows={this.state.rows} onChange={(key, value) => this.handleClick(key, value)} />;
     }
 
     render() {

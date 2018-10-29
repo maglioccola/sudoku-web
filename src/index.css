@@ -16,9 +16,18 @@ body {
   .status {
     margin-bottom: 10px;
   }
+
+  .square-ok {
+    background: green;
+  }
+  .square-error {
+    background: red;
+  }
+  .square-default {
+    background: #fff;
+  }
   
   .square {
-    background: #fff;
     border: 1px solid #999;
     float: left;
     font-size: 24px;
